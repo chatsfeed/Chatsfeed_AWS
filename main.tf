@@ -306,13 +306,13 @@ resource "aws_main_route_table_association" "public" {
 # and associate route table with each subnet
 resource "aws_route_table_association" "public" {
   count           = "${length(var.azs)}"
-  subnet_id      = "${element(data.aws_subnet_ids.public.ids, count.index)}"
+  subnet_id      = element(data.aws_subnet_ids.public.ids, count.index)
   route_table_id = aws_route_table.public.id
 }
 
 # create elastic IP (EIP) to assign it the NAT Gateway 
 resource "aws_eip" "demo_eip" {
-  count    = "${length(var.azs)}"
+  count    = length(var.azs)
   vpc      = true
   depends_on = [aws_internet_gateway.gw]
 }
@@ -320,16 +320,16 @@ resource "aws_eip" "demo_eip" {
 # create NAT Gateways
 # make sure to create the nat in a internet-facing subnet (public subnet)
 resource "aws_nat_gateway" "demo" {
-    count    = "${length(var.azs)}"
-    allocation_id = "${element(aws_eip.demo_eip.*.id, count.index)}"
-    subnet_id = "${element(aws_subnet.public.*.id, count.index)}"
+    count    = length(var.azs)
+    allocation_id = element(aws_eip.demo_eip.*.id, count.index)
+    subnet_id = element(aws_subnet.public.*.id, count.index)
     depends_on = [aws_internet_gateway.gw]
 }
 
 # for each of the private ranges, create a "private" route table.
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.demo.id
-  count ="${length(var.azs)}" 
+  count =length(var.azs) 
   tags = { 
     Name = "private_subnet_route_table_${count.index}"
   }
@@ -337,11 +337,11 @@ resource "aws_route_table" "private" {
 
 # add a nat gateway to each private subnet's route table
 resource "aws_route" "private_nat_gateway_route" {
-  count = "${length(var.azs)}"
-  route_table_id = "${element(aws_route_table.private.*.id, count.index)}"
+  count = length(var.azs)
+  route_table_id = element(aws_route_table.private.*.id, count.index)
   destination_cidr_block = "0.0.0.0/0"
   depends_on = [aws_route_table.private]
-  nat_gateway_id = "${element(aws_nat_gateway.demo.*.id, count.index)}"
+  nat_gateway_id = element(aws_nat_gateway.demo.*.id, count.index)
 }
 
 
@@ -410,9 +410,9 @@ resource "aws_alb_listener" "http_listener" {
 # target group attach
 # using nested interpolation functions and the count parameter to the "aws_alb_target_group_attachment"
 resource "aws_lb_target_group_attachment" "docker-demo" {
-  count            = "${length(var.azs)}"
+  count            = length(var.azs)
   target_group_arn = aws_alb_target_group.docker-demo-tg.arn
-  target_id        =  "${element(split(",", join(",", aws_instance.docker_demo.*.id)), count.index)}"
+  target_id        =  element(split(",", join(",", aws_instance.docker_demo.*.id)), count.index)
   port             = 80
 }
 
@@ -510,13 +510,13 @@ resource "aws_security_group" "docker_demo_ec2" {
 
 # EC2 instances, one per availability zone
 resource "aws_instance" "docker_demo" {
-  ami                         = "${lookup(var.ec2_amis, var.aws_region)}"
+  ami                         = lookup(var.ec2_amis, var.aws_region)
   associate_public_ip_address = true
-  count                       = "${length(var.azs)}"
+  count                       = length(var.azs)
   depends_on                  = [aws_subnet.private]
   instance_type               = "t2.micro"
-  subnet_id                   = "${element(aws_subnet.private.*.id,count.index)}"
-  user_data                   = "${file("user_data.sh")}"
+  subnet_id                   = element(aws_subnet.private.*.id,count.index)
+  user_data                   = file("user_data.sh")
 
   # references security group created above
   vpc_security_group_ids = [aws_security_group.docker_demo_ec2.id]
