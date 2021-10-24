@@ -237,7 +237,7 @@ resource "aws_vpc" "demo" {
 # let vpc talk to the internet - create internet gateway 
 resource "aws_internet_gateway" "gw" {
   vpc_id = aws_vpc.demo.id
-  tags {
+  tags = {
     Name = "docker-nginx-demo-igw"
   }
 }
