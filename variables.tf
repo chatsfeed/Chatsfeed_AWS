@@ -101,3 +101,21 @@ variable "tags" {
   default     = {}
   type        = map(string)
 }
+
+variable "website-domain" {
+  description = "Root domain"
+  type        = string
+  default     = "chatsfeed.com"
+}
+
+variable "www-website-domain" {
+  description = "Main website domain"
+  type        = string
+  default     = "www.chatsfeed.com"
+}
+
+variable "app-website-domain" {
+  description = "Portal website domain"
+  type        = string
+  default     = "app.chatsfeed.com"
+}
