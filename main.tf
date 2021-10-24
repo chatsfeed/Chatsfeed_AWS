@@ -63,6 +63,7 @@ resource "aws_acm_certificate" "wildcard_website" {
 }
 
 
+
 # This resource is simply a waiter for manual email approval of ACM certificates.
 # We use the aws_acm_certificate_validation resource to wait for the newly created certificate to become valid
 # and then use its outputs to associate the certificate Amazon Resource Name (ARN) with the CloudFront distribution
