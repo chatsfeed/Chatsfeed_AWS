@@ -107,7 +107,7 @@ resource "aws_cloudfront_distribution" "website_cdn_root" {
 
   # Origin is where CloudFront gets its content from 
   origin {
-    origin_id   = aws_alb.load_balancer.id 
+    origin_id   = aws_alb.docker_demo_alb.id 
     domain_name = var.website-domain
 
     custom_origin_config {
