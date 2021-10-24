@@ -95,3 +95,9 @@ variable "rds_admin_password" {
 variable "rds_publicly_accessible" {
   default = "false"
 }
+
+variable "tags" {
+  description = "Tags added to resources"
+  default     = {}
+  type        = map(string)
+}
