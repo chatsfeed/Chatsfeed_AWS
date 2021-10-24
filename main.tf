@@ -261,7 +261,7 @@ resource "aws_subnet" "private" {
   count                   = "${length(var.azs)}"
   map_public_ip_on_launch = true
   vpc_id                  = aws_vpc.demo.id
-  tags {
+  tags = {
     Name = "subnet-priv-${count.index}"
   }
 }
@@ -281,7 +281,7 @@ data "aws_subnet_ids" "private" {
 # main route table for vpc and subnets
 resource "aws_route_table" "public" {
   vpc_id = aws_vpc.demo.id
-  tags {
+  tags = {
     Name = "public_route_table_main"
   }
 }
@@ -326,7 +326,7 @@ resource "aws_nat_gateway" "demo" {
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.demo.id
   count ="${length(var.azs)}" 
-  tags { 
+  tags = { 
     Name = "private_subnet_route_table_${count.index}"
   }
 }
@@ -364,7 +364,7 @@ resource "aws_security_group" "docker_demo_alb_sg" {
     to_port     = 0
     cidr_blocks = ["0.0.0.0/0"]
   }
-  tags {
+  tags = {
     Name = "alb-security-group-docker-demo"
   }
 }
@@ -374,7 +374,7 @@ resource "aws_alb" "docker_demo_alb" {
   name                      = "docker-demo-alb"
   security_groups           = [aws_security_group.docker_demo_alb_sg.id]
   subnets                   = [aws_subnet.private.*.id]
-  tags {
+  tags = {
     Name = "docker-demo-alb"
   }
 }
@@ -440,7 +440,7 @@ resource "aws_security_group" "rds_security_group" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
-  tags {
+  tags = {
     Name = "rds_security_group"
   }
 }
@@ -462,7 +462,7 @@ resource "aws_db_instance" "db" {
   # commented : if there is no default subnet, this will give us an error
   #db_subnet_group_name   = "rds_test"
 
-  tags {
+  tags = {
     Name = "Postgres Database in ${var.aws_region}"
   }
 }
@@ -517,7 +517,7 @@ resource "aws_instance" "docker_demo" {
   # references security group created above
   vpc_security_group_ids = [aws_security_group.docker_demo_ec2.id]
 
-  tags {
+  tags = {
     Name = "docker-nginx-demo-instance-${count.index}"
   }
 }
