@@ -124,8 +124,8 @@ resource "aws_cloudfront_distribution" "website_cdn_root" {
   #default_root_object = "index.html"
 
   logging_config {
-    bucket = aws_s3_bucket.website_logs.bucket_domain_name
-    prefix = "${var.www-website-domain}/"
+    bucket = aws_s3_bucket.s3_website_logs.bucket_domain_name
+    prefix = "${var.website-domain}/"
   }
 
   default_cache_behavior {
@@ -201,8 +201,8 @@ resource "aws_route53_record" "website_cdn_root_record" {
 
 
 # Creates bucket to store logs
-resource "aws_s3_bucket" "website_logs" {
-  bucket = "${var.www-website-domain}-logs"
+resource "aws_s3_bucket" "s3_website_logs" {
+  bucket = "${var.website-domain}-logs"
   acl    = "log-delivery-write"
 
   # Comment the following line if you are uncomfortable with Terraform destroying the bucket even if this one is not empty
