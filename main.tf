@@ -135,7 +135,7 @@ resource "aws_cloudfront_distribution" "website_cdn_root" {
     allowed_methods  = ["GET", "HEAD", "OPTIONS", "PATCH", "POST", "PUT", "DELETE"]
     cached_methods   = ["GET", "HEAD", "OPTIONS"]
     # This needs to match the `origin_id` above 
-    target_origin_id = aws_alb.load_balancer.id 
+    target_origin_id = aws_alb.docker_demo_alb.id 
     min_ttl          = "0"
     default_ttl      = "300"
     max_ttl          = "1200"
@@ -341,6 +341,9 @@ resource "aws_route" "private_nat_gateway_route" {
   depends_on = ["aws_route_table.private"]
   nat_gateway_id = "${element(aws_nat_gateway.demo.*.id, count.index)}"
 }
+
+
+
 
 
 
