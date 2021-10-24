@@ -248,9 +248,9 @@ resource "aws_internet_gateway" "gw" {
 
 # create one public subnet per availability zone
 resource "aws_subnet" "public" {
-  availability_zone       = "${element(var.azs,count.index)}"
-  cidr_block              = "${element(var.public_subnets_cidr,count.index)}"
-  count                   = "${length(var.azs)}"
+  availability_zone       = element(var.azs,count.index)
+  cidr_block              = element(var.public_subnets_cidr,count.index)
+  count                   = length(var.azs)
   map_public_ip_on_launch = true
   vpc_id                  = aws_vpc.demo.id
   tags = {
@@ -260,9 +260,9 @@ resource "aws_subnet" "public" {
 
 # create one private subnet per availability zone
 resource "aws_subnet" "private" {
-  availability_zone       = "${element(var.azs,count.index)}"
-  cidr_block              = "${element(var.private_subnets_cidr,count.index)}"
-  count                   = "${length(var.azs)}"
+  availability_zone       = element(var.azs,count.index)
+  cidr_block              = element(var.private_subnets_cidr,count.index)
+  count                   = length(var.azs)
   map_public_ip_on_launch = true
   vpc_id                  = aws_vpc.demo.id
   tags = {
@@ -305,7 +305,7 @@ resource "aws_main_route_table_association" "public" {
 
 # and associate route table with each subnet
 resource "aws_route_table_association" "public" {
-  count           = "${length(var.azs)}"
+  count           = length(var.azs)
   subnet_id      = element(data.aws_subnet_ids.public.ids, count.index)
   route_table_id = aws_route_table.public.id
 }
