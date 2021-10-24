@@ -2,7 +2,7 @@
 # Some AWS services require the us-east-1 (N. Virginia) region to be configured:
 # To use an ACM certificate with CloudFront, we must request or import the certificate in the US East (N. Virginia) region.
 provider "aws" {
-  alias  = "us-east-1"
+  #alias  = "us-east-1"
   region = "us-east-1"
   access_key = var.access_key
   secret_key = var.secret_key 
