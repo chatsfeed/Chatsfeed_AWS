@@ -229,7 +229,7 @@ resource "aws_vpc" "demo" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_support   = true
   enable_dns_hostnames = true
-  tags {
+  tags = {
     Name = "docker-nginx-demo-vpc"
   }
 }
@@ -249,7 +249,7 @@ resource "aws_subnet" "public" {
   count                   = "${length(var.azs)}"
   map_public_ip_on_launch = true
   vpc_id                  = aws_vpc.demo.id
-  tags {
+  tags = {
     Name = "subnet-pub-${count.index}"
   }
 }
