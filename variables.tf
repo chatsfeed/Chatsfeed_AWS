@@ -19,13 +19,13 @@ variable "aws_region" {
 # specifying AZs 
 #   comment off this "azs" to retrive all AZs dynamically (uncomment the line above "data ...")
 variable "azs" {
-  type = "list"
+  type = list
   default = ["us-east-1a", "us-east-1b", "us-east-1c"]
 }
 
 variable "ec2_amis" {
   description = "Ubuntu Server 16.04 LTS (HVM)"
-  type        = "map"
+  type        = map
 
   default = {
     "us-east-1" = "ami-059eeca93cf09eebd"
@@ -36,12 +36,12 @@ variable "ec2_amis" {
 }
 
 variable "public_subnets_cidr" {
-  type = "list"
+  type = list
   default = ["10.0.0.0/24", "10.0.2.0/24", "10.0.4.0/24"]
 }
 
 variable "private_subnets_cidr" {
-  type = "list"
+  type = list
   default = ["10.0.1.0/24", "10.0.3.0/24", "10.0.5.0/24"]
 }
 
