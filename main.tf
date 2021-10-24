@@ -13,18 +13,18 @@ provider "aws" {
 # ------------------------------------------------------------------------------
 # CONFIGURE TERRAFORM BACKEND
 # ------------------------------------------------------------------------------
-terraform {
-  backend "s3" {
+#terraform {
+  #backend "s3" {
     # Replace this with your bucket name!
-    bucket         = "chatsfeed-terraform-s3-remote-state"
-    key            = "terraform.tfstate"
-    region  = "us-east-2"
+    #bucket         = "chatsfeed-terraform-s3-remote-state"
+    #key            = "terraform.tfstate"
+    #region  = "us-east-2"
     # Replace this with your DynamoDB table name!
-    dynamodb_table = "chatsfeed-terraform-dynamodb-remote-state-locks"
-    encrypt        = true
-  }
+    #dynamodb_table = "chatsfeed-terraform-dynamodb-remote-state-locks"
+    #encrypt        = true
+  #}
 
-}
+#}
 
 
 ## AWS Route53 is a DNS service used to perform three main functions: domain registration, DNS routing, and health checking.
