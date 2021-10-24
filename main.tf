@@ -238,7 +238,7 @@ resource "aws_vpc" "demo" {
 
 # let vpc talk to the internet - create internet gateway 
 resource "aws_internet_gateway" "gw" {
-  vpc_id = "${aws_vpc.demo.id}"
+  vpc_id = aws_vpc.demo.id
   tags {
     Name = "docker-nginx-demo-igw"
   }
@@ -250,7 +250,7 @@ resource "aws_subnet" "public" {
   cidr_block              = "${element(var.public_subnets_cidr,count.index)}"
   count                   = "${length(var.azs)}"
   map_public_ip_on_launch = true
-  vpc_id                  = "${aws_vpc.demo.id}"
+  vpc_id                  = aws_vpc.demo.id
   tags {
     Name = "subnet-pub-${count.index}"
   }
@@ -262,7 +262,7 @@ resource "aws_subnet" "private" {
   cidr_block              = "${element(var.private_subnets_cidr,count.index)}"
   count                   = "${length(var.azs)}"
   map_public_ip_on_launch = true
-  vpc_id                  = "${aws_vpc.demo.id}"
+  vpc_id                  = aws_vpc.demo.id
   tags {
     Name = "subnet-priv-${count.index}"
   }
@@ -270,19 +270,19 @@ resource "aws_subnet" "private" {
 
 # dynamic list of the public subnets created above
 data "aws_subnet_ids" "public" {
-  depends_on = ["aws_subnet.public"]
-  vpc_id     = "${aws_vpc.demo.id}"
+  depends_on = [aws_subnet.public]
+  vpc_id     = aws_vpc.demo.id
 }
 
 # dynamic list of the private subnets created above
 data "aws_subnet_ids" "private" {
-  depends_on = ["aws_subnet.private"]
-  vpc_id     = "${aws_vpc.demo.id}"
+  depends_on = [aws_subnet.private]
+  vpc_id     = aws_vpc.demo.id
 }
 
 # main route table for vpc and subnets
 resource "aws_route_table" "public" {
-  vpc_id = "${aws_vpc.demo.id}"
+  vpc_id = aws_vpc.demo.id
   tags {
     Name = "public_route_table_main"
   }
@@ -290,29 +290,29 @@ resource "aws_route_table" "public" {
 
 # add public gateway to the route table
 resource "aws_route" "public" {
-  gateway_id             = "${aws_internet_gateway.gw.id}"
+  gateway_id             = aws_internet_gateway.gw.id
   destination_cidr_block = "0.0.0.0/0"
-  route_table_id         = "${aws_route_table.public.id}"
+  route_table_id         = aws_route_table.public.id
 }
 
 # associate route table with vpc
 resource "aws_main_route_table_association" "public" {
-  vpc_id         = "${aws_vpc.demo.id}"
-  route_table_id = "${aws_route_table.public.id}"
+  vpc_id         = aws_vpc.demo.id
+  route_table_id = aws_route_table.public.id
 }
 
 # and associate route table with each subnet
 resource "aws_route_table_association" "public" {
   count           = "${length(var.azs)}"
   subnet_id      = "${element(data.aws_subnet_ids.public.ids, count.index)}"
-  route_table_id = "${aws_route_table.public.id}"
+  route_table_id = aws_route_table.public.id
 }
 
 # create elastic IP (EIP) to assign it the NAT Gateway 
 resource "aws_eip" "demo_eip" {
   count    = "${length(var.azs)}"
   vpc      = true
-  depends_on = ["aws_internet_gateway.gw"]
+  depends_on = [aws_internet_gateway.gw]
 }
 
 # create NAT Gateways
@@ -321,12 +321,12 @@ resource "aws_nat_gateway" "demo" {
     count    = "${length(var.azs)}"
     allocation_id = "${element(aws_eip.demo_eip.*.id, count.index)}"
     subnet_id = "${element(aws_subnet.public.*.id, count.index)}"
-    depends_on = ["aws_internet_gateway.gw"]
+    depends_on = [aws_internet_gateway.gw]
 }
 
 # for each of the private ranges, create a "private" route table.
 resource "aws_route_table" "private" {
-  vpc_id = "${aws_vpc.demo.id}"
+  vpc_id = aws_vpc.demo.id
   count ="${length(var.azs)}" 
   tags { 
     Name = "private_subnet_route_table_${count.index}"
@@ -338,7 +338,7 @@ resource "aws_route" "private_nat_gateway_route" {
   count = "${length(var.azs)}"
   route_table_id = "${element(aws_route_table.private.*.id, count.index)}"
   destination_cidr_block = "0.0.0.0/0"
-  depends_on = ["aws_route_table.private"]
+  depends_on = [aws_route_table.private]
   nat_gateway_id = "${element(aws_nat_gateway.demo.*.id, count.index)}"
 }
 
@@ -351,7 +351,7 @@ resource "aws_route" "private_nat_gateway_route" {
 resource "aws_security_group" "docker_demo_alb_sg" {
   name        = "docker-nginx-demo-alb-sg"
   description = "allow incoming HTTP traffic only"
-  vpc_id      = "${aws_vpc.demo.id}"
+  vpc_id      = aws_vpc.demo.id
 
   ingress {
     protocol    = "tcp"
@@ -374,8 +374,8 @@ resource "aws_security_group" "docker_demo_alb_sg" {
 # using ALB - instances in private subnets
 resource "aws_alb" "docker_demo_alb" {
   name                      = "docker-demo-alb"
-  security_groups           = ["${aws_security_group.docker_demo_alb_sg.id}"]
-  subnets                   = ["${aws_subnet.private.*.id}"]
+  security_groups           = [aws_security_group.docker_demo_alb_sg.id]
+  subnets                   = [aws_subnet.private.*.id]
   tags {
     Name = "docker-demo-alb"
   }
@@ -386,7 +386,7 @@ resource "aws_alb_target_group" "docker-demo-tg" {
   name     = "docker-demo-alb-target-group"
   port     = 80
   protocol = "HTTP"
-  vpc_id   = "${aws_vpc.demo.id}"
+  vpc_id   = aws_vpc.demo.id
   health_check {
     path = "/"
     port = 80
@@ -395,12 +395,12 @@ resource "aws_alb_target_group" "docker-demo-tg" {
 
 # listener
 resource "aws_alb_listener" "http_listener" {
-  load_balancer_arn = "${aws_alb.docker_demo_alb.arn}"
+  load_balancer_arn = aws_alb.docker_demo_alb.arn
   port              = "80"
   protocol          = "HTTP"
 
   default_action {
-    target_group_arn = "${aws_alb_target_group.docker-demo-tg.arn}"
+    target_group_arn = aws_alb_target_group.docker-demo-tg.arn
     type             = "forward"
   }
 }
@@ -409,7 +409,7 @@ resource "aws_alb_listener" "http_listener" {
 # using nested interpolation functions and the count parameter to the "aws_alb_target_group_attachment"
 resource "aws_lb_target_group_attachment" "docker-demo" {
   count            = "${length(var.azs)}"
-  target_group_arn = "${aws_alb_target_group.docker-demo-tg.arn}"
+  target_group_arn = aws_alb_target_group.docker-demo-tg.arn
   target_id        =  "${element(split(",", join(",", aws_instance.docker_demo.*.id)), count.index)}"
   port             = 80
 }
@@ -426,7 +426,7 @@ output "url" {
 resource "aws_security_group" "rds_security_group" {
   name        = "rds_security_group"
   description = "rds security group"
-  vpc_id      = "${aws_vpc.demo.id}"
+  vpc_id      = aws_vpc.demo.id
 
   ingress {
     from_port   = 5432
@@ -448,16 +448,16 @@ resource "aws_security_group" "rds_security_group" {
 }
 
 resource "aws_db_instance" "db" {
-  engine            = "${var.rds_engine}"
-  engine_version    = "${var.rds_engine_version}"
-  identifier        = "${var.rds_identifier}"
-  instance_class    = "${var.rds_instance_type}"
-  allocated_storage = "${var.rds_storage_size}"
-  name              = "${var.rds_db_name}"
-  username          = "${var.rds_admin_user}"
-  password          = "${var.rds_admin_password}"
-  publicly_accessible    = "${var.rds_publicly_accessible}"
-  vpc_security_group_ids = ["${aws_security_group.rds_security_group.id}"]
+  engine            = var.rds_engine
+  engine_version    = var.rds_engine_version
+  identifier        = var.rds_identifier
+  instance_class    = var.rds_instance_type
+  allocated_storage = var.rds_storage_size
+  name              = var.rds_db_name
+  username          = var.rds_admin_user
+  password          = var.rds_admin_password
+  publicly_accessible    = var.rds_publicly_accessible
+  vpc_security_group_ids = [aws_security_group.rds_security_group.id]
   final_snapshot_identifier = "demo-db-backup"
   skip_final_snapshot       = true
 
@@ -472,7 +472,7 @@ resource "aws_db_instance" "db" {
 resource "aws_db_subnet_group" "rds_test" {
   name       = "rds_test"
   count         = "3"
-  subnet_ids                   = ["${aws_subnet.private.*.id}"]
+  subnet_ids                   = [aws_subnet.private.*.id]
 
 }
 
@@ -489,7 +489,7 @@ output "postgress-address" {
 resource "aws_security_group" "docker_demo_ec2" {
   name        = "docker-nginx-demo-ec2"
   description = "allow incoming HTTP traffic only"
-  vpc_id      = "${aws_vpc.demo.id}"
+  vpc_id      = aws_vpc.demo.id
 
   ingress {
     protocol    = "tcp"
@@ -517,7 +517,7 @@ resource "aws_instance" "docker_demo" {
   user_data                   = "${file("user_data.sh")}"
 
   # references security group created above
-  vpc_security_group_ids = ["${aws_security_group.docker_demo_ec2.id}"]
+  vpc_security_group_ids = [aws_security_group.docker_demo_ec2.id]
 
   tags {
     Name = "docker-nginx-demo-instance-${count.index}"
