@@ -16,17 +16,14 @@ provider "aws" {
 terraform {
   backend "s3" {
     # Replace this with your bucket name!
-    bucket         = "chatsfeed-terraform-remote-state-s3"
+    bucket         = "chatsfeed-terraform-s3-remote-state"
     key            = "terraform.tfstate"
     region  = "us-east-1"
     # Replace this with your DynamoDB table name!
-    dynamodb_table = "chatsfeed-terraform-remote-state-s3-locks"
+    dynamodb_table = "chatsfeed-terraform-dynamodb-remote-state-locks"
     encrypt        = true
   }
-  # An argument named "depends_on" is not expected here
-  # this is why we first have to create those resources to then run our terraform with remote state in s3
-  # the state file will be local on the first run to create the resources, then will be remote on the second run
-  #depends_on = [aws_s3_bucket.terraform_state, aws_dynamodb_table.terraform_locks]
+
 }
 
 
