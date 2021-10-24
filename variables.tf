@@ -13,6 +13,16 @@ variable "aws_region" {
   default     = "us-east-1"
 }
 
+variable "access_key" {
+  type        = string
+  default     = ""
+}
+
+variable "secret_key" {
+  type        = string
+  default     = ""
+}
+
 # dynamically retrieves all availability zones for current region
 #data "aws_availability_zones" "available" {}
 
